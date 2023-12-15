@@ -1,0 +1,15 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies 
+COPY package.json yarn.lock*  ./
+RUN yarn install --frozen-lockfile
+
+COPY src ./src
+COPY public ./public
+COPY next.config.js .
+COPY tsconfig.json .
+
+# Start Next.js in development mode 
+CMD yarn dev

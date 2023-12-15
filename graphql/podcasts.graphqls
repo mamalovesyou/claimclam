@@ -1,0 +1,17 @@
+# GraphQL schema for podcast service
+
+type Query {
+  podcasts(
+    search: String
+    title: String
+    categoryName: String
+    page: Int
+    limit: Int
+  ): [Podcast]
+}
+
+type Podcast {
+  id: ID!
+  title: String!
+  categoryName: String
+}
