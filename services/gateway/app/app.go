@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/gorilla/mux"
 	"github.com/mamalovesyou/getclaim/internal/logging"
+	"github.com/mamalovesyou/getclaim/internal/podcasts"
 	"github.com/mamalovesyou/getclaim/internal/server"
 	"github.com/mamalovesyou/getclaim/services/gateway/graph/resolvers"
 	"go.uber.org/fx"
@@ -17,6 +18,7 @@ func NewApp(config *server.Config) *fx.App {
 		}),
 		fx.Provide(
 			logging.NewLogger,
+			podcasts.NewClient,
 			resolvers.NewResolver,
 		),
 		fx.Invoke(

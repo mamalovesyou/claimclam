@@ -6,18 +6,27 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/mamalovesyou/getclaim/graphql/gen/model"
-	graph1 "github.com/mamalovesyou/getclaim/services/gateway/graph"
+	"github.com/mamalovesyou/getclaim/internal/logging"
+	"github.com/mamalovesyou/getclaim/internal/podcasts"
+	"github.com/mamalovesyou/getclaim/services/gateway/graph"
 )
 
 // Podcasts is the resolver for the podcasts field.
 func (r *queryResolver) Podcasts(ctx context.Context, search *string, title *string, categoryName *string, page *int, limit *int) ([]*model.Podcast, error) {
-	panic(fmt.Errorf("not implemented: Podcasts - podcasts"))
+	logging.WithContext(ctx).Debug("Podcast query")
+	params := &podcasts.ListPodcastsParams{
+		Search:       search,
+		Title:        title,
+		CategoryName: categoryName,
+		Page:         page,
+		Limit:        limit,
+	}
+	return r.podcastsClient.ListPodcasts(ctx, params)
 }
 
 // Query returns graph1.QueryResolver implementation.
-func (r *Resolver) Query() graph1.QueryResolver { return &queryResolver{r} }
+func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }

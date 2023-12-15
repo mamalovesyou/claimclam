@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/99designs/gqlgen v0.17.41
+	github.com/AlekSi/pointer v1.2.0
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1

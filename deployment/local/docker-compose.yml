@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+
+  webapp:
+    build:
+      context: ../../webapp
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../../webapp/src:/app/src
+      - ../../webapp/public:/app/public
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - getclaim_net
+
+  gateway:
+    image: cosmtrek/air
+    working_dir: /service
+    entrypoint: ["air", "-c", "./services/gateway/air.toml"]
+    volumes:
+      - ../..:/service:delegated
+    ports:
+      - 3001:3001
+    environment:
+      PORT: 3001
+    env_file:
+      - ../../.env
+    networks:
+      - getclaim_net
+
+networks:
+  getclaim_net:
