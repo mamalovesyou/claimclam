@@ -1,8 +1,6 @@
 package ratelimiter
 
 import (
-	"net/http"
-	"strings"
 	"sync"
 
 	"golang.org/x/time/rate"
@@ -51,20 +49,4 @@ func (i *IPRateLimiter) Allow(ip string) bool {
 		limiter = i.AddIP(ip)
 	}
 	return limiter.Allow()
-}
-
-// IPRateLimitMiddleware creates a middleware for HTTP handlers to limit requests
-// based on the IP address of the requester.
-func IPRateLimitMiddleware(ipLimiter *IPRateLimiter) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Get the limiter for the IP address
-			ip := strings.Split(r.RemoteAddr, ":")[0]
-			if !ipLimiter.Allow(ip) {
-				http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
-				return
-			}
-			next.ServeHTTP(w, r)
-		})
-	}
 }

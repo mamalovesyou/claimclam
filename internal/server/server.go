@@ -8,14 +8,13 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/mamalovesyou/claimclam/internal/ratelimiter"
+	"github.com/mamalovesyou/claimclam/internal/server/middlewares"
 	"github.com/rs/cors"
 	"go.uber.org/fx"
 )
 
 func NewMux(lc fx.Lifecycle, cfg *Config) *mux.Router {
 	logger := cfg.Logger
-	logger.Info("Executing NewMux.")
-
 	r := mux.NewRouter()
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
@@ -24,17 +23,19 @@ func NewMux(lc fx.Lifecycle, cfg *Config) *mux.Router {
 	// Add rate limiter
 	limiter := ratelimiter.NewIPRateLimiter(3, 5)
 
+	// Middlewares
 	r.Use(cors.New(cors.Options{
 		AllowedOrigins:   cfg.AllowedOrigins,
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "HEAD", "OPTIONS"},
-		Debug:            true,
 	}).Handler)
+	r.Use(middlewares.IPRateLimitMiddleware(limiter))
+	r.Use(middlewares.LoggerMiddleware(logger))
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf("%s:%s", cfg.Address, cfg.Port),
-		Handler: ratelimiter.IPRateLimitMiddleware(limiter)(r),
+		Handler: r,
 	}
 
 	lc.Append(fx.Hook{

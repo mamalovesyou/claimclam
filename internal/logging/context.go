@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// contextKey is a custom type to avoid context key collisions
 type contextKey string
 
 var loggerKey contextKey = "_zap_logger"
