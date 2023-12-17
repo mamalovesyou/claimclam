@@ -49,7 +49,11 @@ const useListPodcasts = (filters: PodcastsFilters) => {
   return useQuery({
     queryKey: ["podcasts", filters],
     queryFn: async () =>
-      request("http://localhost:3001/graphql", listPodcastsQuery, filters),
+      request(
+        process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:3001/graphql",
+        listPodcastsQuery,
+        filters
+      ),
   });
 };
 

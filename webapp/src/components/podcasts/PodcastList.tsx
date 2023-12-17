@@ -1,13 +1,5 @@
 import { usePodcasts } from "@/hooks/usePodcasts";
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  CircularProgress,
-  Grid,
-  Pagination,
-  Typography,
-} from "@mui/material";
+import { CircularProgress, Grid, Pagination, Typography } from "@mui/material";
 import { PodcastCard } from "./PodcastCard";
 
 export const PodcastList = () => {
@@ -42,6 +34,15 @@ export const PodcastList = () => {
             {podcast ? <PodcastCard podcast={podcast} /> : null}
           </Grid>
         ))}
+      {podcasts.length === 0 && (
+        <Grid
+          item
+          xs={12}
+          sx={{ p: 3, display: "flex", justifyContent: "center" }}
+        >
+          <Typography variant="body1">No podcasts found</Typography>
+        </Grid>
+      )}
       <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
         <Pagination
           count={pageInfo?.totalPages || 1}
