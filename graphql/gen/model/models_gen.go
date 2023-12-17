@@ -2,8 +2,32 @@
 
 package model
 
+import (
+	"github.com/google/uuid"
+)
+
+type PageInfo struct {
+	CurrentPage *int `json:"currentPage,omitempty"`
+	TotalPages  *int `json:"totalPages,omitempty"`
+}
+
 type Podcast struct {
-	ID           string  `json:"id"`
-	Title        string  `json:"title"`
-	CategoryName *string `json:"categoryName,omitempty"`
+	ID          uuid.UUID      `json:"id"`
+	Title       string         `json:"title"`
+	Category    *string        `json:"category,omitempty"`
+	Description *string        `json:"description,omitempty"`
+	Images      *PodcastImages `json:"images,omitempty"`
+}
+
+type PodcastImages struct {
+	Default   *string `json:"default,omitempty"`
+	Thumbnail *string `json:"thumbnail,omitempty"`
+	Wide      *string `json:"wide,omitempty"`
+	Featured  *string `json:"featured,omitempty"`
+}
+
+type PodcastPage struct {
+	Items      []*Podcast `json:"items,omitempty"`
+	TotalCount *int       `json:"totalCount,omitempty"`
+	PageInfo   *PageInfo  `json:"pageInfo,omitempty"`
 }

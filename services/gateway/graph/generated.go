@@ -13,6 +13,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/google/uuid"
 	"github.com/mamalovesyou/getclaim/graphql/gen/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -45,19 +46,39 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	PageInfo struct {
+		CurrentPage func(childComplexity int) int
+		TotalPages  func(childComplexity int) int
+	}
+
 	Podcast struct {
-		CategoryName func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Title        func(childComplexity int) int
+		Category    func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Images      func(childComplexity int) int
+		Title       func(childComplexity int) int
+	}
+
+	PodcastImages struct {
+		Default   func(childComplexity int) int
+		Featured  func(childComplexity int) int
+		Thumbnail func(childComplexity int) int
+		Wide      func(childComplexity int) int
+	}
+
+	PodcastPage struct {
+		Items      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
 	}
 
 	Query struct {
-		Podcasts func(childComplexity int, search *string, title *string, categoryName *string, page *int, limit *int) int
+		Podcasts func(childComplexity int, search *string, title *string, category *string, page *int, limit *int) int
 	}
 }
 
 type QueryResolver interface {
-	Podcasts(ctx context.Context, search *string, title *string, categoryName *string, page *int, limit *int) ([]*model.Podcast, error)
+	Podcasts(ctx context.Context, search *string, title *string, category *string, page *int, limit *int) (*model.PodcastPage, error)
 }
 
 type executableSchema struct {
@@ -79,12 +100,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Podcast.categoryName":
-		if e.complexity.Podcast.CategoryName == nil {
+	case "PageInfo.currentPage":
+		if e.complexity.PageInfo.CurrentPage == nil {
 			break
 		}
 
-		return e.complexity.Podcast.CategoryName(childComplexity), true
+		return e.complexity.PageInfo.CurrentPage(childComplexity), true
+
+	case "PageInfo.totalPages":
+		if e.complexity.PageInfo.TotalPages == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.TotalPages(childComplexity), true
+
+	case "Podcast.category":
+		if e.complexity.Podcast.Category == nil {
+			break
+		}
+
+		return e.complexity.Podcast.Category(childComplexity), true
+
+	case "Podcast.description":
+		if e.complexity.Podcast.Description == nil {
+			break
+		}
+
+		return e.complexity.Podcast.Description(childComplexity), true
 
 	case "Podcast.id":
 		if e.complexity.Podcast.ID == nil {
@@ -93,12 +135,68 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Podcast.ID(childComplexity), true
 
+	case "Podcast.images":
+		if e.complexity.Podcast.Images == nil {
+			break
+		}
+
+		return e.complexity.Podcast.Images(childComplexity), true
+
 	case "Podcast.title":
 		if e.complexity.Podcast.Title == nil {
 			break
 		}
 
 		return e.complexity.Podcast.Title(childComplexity), true
+
+	case "PodcastImages.default":
+		if e.complexity.PodcastImages.Default == nil {
+			break
+		}
+
+		return e.complexity.PodcastImages.Default(childComplexity), true
+
+	case "PodcastImages.featured":
+		if e.complexity.PodcastImages.Featured == nil {
+			break
+		}
+
+		return e.complexity.PodcastImages.Featured(childComplexity), true
+
+	case "PodcastImages.thumbnail":
+		if e.complexity.PodcastImages.Thumbnail == nil {
+			break
+		}
+
+		return e.complexity.PodcastImages.Thumbnail(childComplexity), true
+
+	case "PodcastImages.wide":
+		if e.complexity.PodcastImages.Wide == nil {
+			break
+		}
+
+		return e.complexity.PodcastImages.Wide(childComplexity), true
+
+	case "PodcastPage.items":
+		if e.complexity.PodcastPage.Items == nil {
+			break
+		}
+
+		return e.complexity.PodcastPage.Items(childComplexity), true
+
+	case "PodcastPage.pageInfo":
+		if e.complexity.PodcastPage.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.PodcastPage.PageInfo(childComplexity), true
+
+	case "PodcastPage.totalCount":
+		if e.complexity.PodcastPage.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.PodcastPage.TotalCount(childComplexity), true
 
 	case "Query.podcasts":
 		if e.complexity.Query.Podcasts == nil {
@@ -110,7 +208,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Podcasts(childComplexity, args["search"].(*string), args["title"].(*string), args["categoryName"].(*string), args["page"].(*int), args["limit"].(*int)), true
+		return e.complexity.Query.Podcasts(childComplexity, args["search"].(*string), args["title"].(*string), args["category"].(*string), args["page"].(*int), args["limit"].(*int)), true
 
 	}
 	return 0, false
@@ -202,21 +300,42 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "../../../graphql/podcasts.graphqls", Input: `# GraphQL schema for podcast service
+scalar UUID
 
 type Query {
   podcasts(
     search: String
     title: String
-    categoryName: String
+    category: String
     page: Int
     limit: Int
-  ): [Podcast]
+  ): PodcastPage
+}
+
+type PodcastPage {
+  items: [Podcast]
+  totalCount: Int
+  pageInfo: PageInfo
+}
+
+type PageInfo {
+  currentPage: Int
+  totalPages: Int
+}
+
+type PodcastImages {
+  default: String
+  thumbnail: String
+  wide: String
+  featured: String
 }
 
 type Podcast {
-  id: ID!
+  id: UUID!
   title: String!
-  categoryName: String
+  category: String
+  description: String
+  images: PodcastImages
 }
 `, BuiltIn: false},
 }
@@ -263,14 +382,14 @@ func (ec *executionContext) field_Query_podcasts_args(ctx context.Context, rawAr
 	}
 	args["title"] = arg1
 	var arg2 *string
-	if tmp, ok := rawArgs["categoryName"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoryName"))
+	if tmp, ok := rawArgs["category"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
 		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["categoryName"] = arg2
+	args["category"] = arg2
 	var arg3 *int
 	if tmp, ok := rawArgs["page"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
@@ -330,6 +449,88 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _PageInfo_currentPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PageInfo_currentPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CurrentPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PageInfo_currentPage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PageInfo_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PageInfo_totalPages(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalPages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PageInfo_totalPages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Podcast_id(ctx context.Context, field graphql.CollectedField, obj *model.Podcast) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Podcast_id(ctx, field)
 	if err != nil {
@@ -356,9 +557,9 @@ func (ec *executionContext) _Podcast_id(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(uuid.UUID)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Podcast_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -368,7 +569,7 @@ func (ec *executionContext) fieldContext_Podcast_id(ctx context.Context, field g
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type UUID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -418,8 +619,8 @@ func (ec *executionContext) fieldContext_Podcast_title(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Podcast_categoryName(ctx context.Context, field graphql.CollectedField, obj *model.Podcast) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Podcast_categoryName(ctx, field)
+func (ec *executionContext) _Podcast_category(ctx context.Context, field graphql.CollectedField, obj *model.Podcast) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Podcast_category(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -432,7 +633,7 @@ func (ec *executionContext) _Podcast_categoryName(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CategoryName, nil
+		return obj.Category, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -446,7 +647,7 @@ func (ec *executionContext) _Podcast_categoryName(ctx context.Context, field gra
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Podcast_categoryName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Podcast_category(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Podcast",
 		Field:      field,
@@ -454,6 +655,403 @@ func (ec *executionContext) fieldContext_Podcast_categoryName(ctx context.Contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Podcast_description(ctx context.Context, field graphql.CollectedField, obj *model.Podcast) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Podcast_description(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Podcast_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Podcast",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Podcast_images(ctx context.Context, field graphql.CollectedField, obj *model.Podcast) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Podcast_images(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Images, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PodcastImages)
+	fc.Result = res
+	return ec.marshalOPodcastImages2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcastImages(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Podcast_images(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Podcast",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "default":
+				return ec.fieldContext_PodcastImages_default(ctx, field)
+			case "thumbnail":
+				return ec.fieldContext_PodcastImages_thumbnail(ctx, field)
+			case "wide":
+				return ec.fieldContext_PodcastImages_wide(ctx, field)
+			case "featured":
+				return ec.fieldContext_PodcastImages_featured(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PodcastImages", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PodcastImages_default(ctx context.Context, field graphql.CollectedField, obj *model.PodcastImages) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PodcastImages_default(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Default, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PodcastImages_default(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PodcastImages",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PodcastImages_thumbnail(ctx context.Context, field graphql.CollectedField, obj *model.PodcastImages) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PodcastImages_thumbnail(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Thumbnail, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PodcastImages_thumbnail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PodcastImages",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PodcastImages_wide(ctx context.Context, field graphql.CollectedField, obj *model.PodcastImages) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PodcastImages_wide(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Wide, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PodcastImages_wide(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PodcastImages",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PodcastImages_featured(ctx context.Context, field graphql.CollectedField, obj *model.PodcastImages) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PodcastImages_featured(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Featured, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PodcastImages_featured(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PodcastImages",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PodcastPage_items(ctx context.Context, field graphql.CollectedField, obj *model.PodcastPage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PodcastPage_items(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Items, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Podcast)
+	fc.Result = res
+	return ec.marshalOPodcast2ᚕᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PodcastPage_items(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PodcastPage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Podcast_id(ctx, field)
+			case "title":
+				return ec.fieldContext_Podcast_title(ctx, field)
+			case "category":
+				return ec.fieldContext_Podcast_category(ctx, field)
+			case "description":
+				return ec.fieldContext_Podcast_description(ctx, field)
+			case "images":
+				return ec.fieldContext_Podcast_images(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Podcast", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PodcastPage_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.PodcastPage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PodcastPage_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PodcastPage_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PodcastPage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PodcastPage_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.PodcastPage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PodcastPage_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PodcastPage_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PodcastPage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "currentPage":
+				return ec.fieldContext_PageInfo_currentPage(ctx, field)
+			case "totalPages":
+				return ec.fieldContext_PageInfo_totalPages(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
 		},
 	}
 	return fc, nil
@@ -473,7 +1071,7 @@ func (ec *executionContext) _Query_podcasts(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Podcasts(rctx, fc.Args["search"].(*string), fc.Args["title"].(*string), fc.Args["categoryName"].(*string), fc.Args["page"].(*int), fc.Args["limit"].(*int))
+		return ec.resolvers.Query().Podcasts(rctx, fc.Args["search"].(*string), fc.Args["title"].(*string), fc.Args["category"].(*string), fc.Args["page"].(*int), fc.Args["limit"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -482,9 +1080,9 @@ func (ec *executionContext) _Query_podcasts(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Podcast)
+	res := resTmp.(*model.PodcastPage)
 	fc.Result = res
-	return ec.marshalOPodcast2ᚕᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx, field.Selections, res)
+	return ec.marshalOPodcastPage2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcastPage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_podcasts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -495,14 +1093,14 @@ func (ec *executionContext) fieldContext_Query_podcasts(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Podcast_id(ctx, field)
-			case "title":
-				return ec.fieldContext_Podcast_title(ctx, field)
-			case "categoryName":
-				return ec.fieldContext_Podcast_categoryName(ctx, field)
+			case "items":
+				return ec.fieldContext_PodcastPage_items(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_PodcastPage_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_PodcastPage_pageInfo(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Podcast", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type PodcastPage", field.Name)
 		},
 	}
 	defer func() {
@@ -2429,6 +3027,44 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** object.gotpl ****************************
 
+var pageInfoImplementors = []string{"PageInfo"}
+
+func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pageInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PageInfo")
+		case "currentPage":
+			out.Values[i] = ec._PageInfo_currentPage(ctx, field, obj)
+		case "totalPages":
+			out.Values[i] = ec._PageInfo_totalPages(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var podcastImplementors = []string{"Podcast"}
 
 func (ec *executionContext) _Podcast(ctx context.Context, sel ast.SelectionSet, obj *model.Podcast) graphql.Marshaler {
@@ -2450,8 +3086,94 @@ func (ec *executionContext) _Podcast(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "categoryName":
-			out.Values[i] = ec._Podcast_categoryName(ctx, field, obj)
+		case "category":
+			out.Values[i] = ec._Podcast_category(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._Podcast_description(ctx, field, obj)
+		case "images":
+			out.Values[i] = ec._Podcast_images(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var podcastImagesImplementors = []string{"PodcastImages"}
+
+func (ec *executionContext) _PodcastImages(ctx context.Context, sel ast.SelectionSet, obj *model.PodcastImages) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podcastImagesImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodcastImages")
+		case "default":
+			out.Values[i] = ec._PodcastImages_default(ctx, field, obj)
+		case "thumbnail":
+			out.Values[i] = ec._PodcastImages_thumbnail(ctx, field, obj)
+		case "wide":
+			out.Values[i] = ec._PodcastImages_wide(ctx, field, obj)
+		case "featured":
+			out.Values[i] = ec._PodcastImages_featured(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var podcastPageImplementors = []string{"PodcastPage"}
+
+func (ec *executionContext) _PodcastPage(ctx context.Context, sel ast.SelectionSet, obj *model.PodcastPage) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podcastPageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodcastPage")
+		case "items":
+			out.Values[i] = ec._PodcastPage_items(ctx, field, obj)
+		case "totalCount":
+			out.Values[i] = ec._PodcastPage_totalCount(ctx, field, obj)
+		case "pageInfo":
+			out.Values[i] = ec._PodcastPage_pageInfo(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2885,13 +3607,13 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalID(v)
+func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
+func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -2900,13 +3622,13 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalString(v)
+func (ec *executionContext) unmarshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, v interface{}) (uuid.UUID, error) {
+	res, err := graphql.UnmarshalUUID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
+func (ec *executionContext) marshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, sel ast.SelectionSet, v uuid.UUID) graphql.Marshaler {
+	res := graphql.MarshalUUID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3210,6 +3932,13 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
+func (ec *executionContext) marshalOPageInfo2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PageInfo(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOPodcast2ᚕᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx context.Context, sel ast.SelectionSet, v []*model.Podcast) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -3256,6 +3985,20 @@ func (ec *executionContext) marshalOPodcast2ᚖgithubᚗcomᚋmamalovesyouᚋget
 		return graphql.Null
 	}
 	return ec._Podcast(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPodcastImages2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcastImages(ctx context.Context, sel ast.SelectionSet, v *model.PodcastImages) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PodcastImages(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPodcastPage2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcastPage(ctx context.Context, sel ast.SelectionSet, v *model.PodcastPage) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PodcastPage(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

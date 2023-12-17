@@ -6,27 +6,43 @@ package resolvers
 
 import (
 	"context"
+	"math"
 
 	"github.com/mamalovesyou/getclaim/graphql/gen/model"
 	"github.com/mamalovesyou/getclaim/internal/logging"
 	"github.com/mamalovesyou/getclaim/internal/podcasts"
 	"github.com/mamalovesyou/getclaim/services/gateway/graph"
+	"go.uber.org/zap"
 )
 
 // Podcasts is the resolver for the podcasts field.
-func (r *queryResolver) Podcasts(ctx context.Context, search *string, title *string, categoryName *string, page *int, limit *int) ([]*model.Podcast, error) {
-	logging.WithContext(ctx).Debug("Podcast query")
+func (r *queryResolver) Podcasts(ctx context.Context, search *string, title *string, category *string, page *int, limit *int) (*model.PodcastPage, error) {
+	logger := logging.WithContext(ctx)
+	logger.Info("Podcast query", zap.Intp("limit", limit), zap.Stringp("search", search), zap.Stringp("title", title), zap.Stringp("category", category), zap.Intp("page", page))
 	params := &podcasts.ListPodcastsParams{
 		Search:       search,
 		Title:        title,
-		CategoryName: categoryName,
+		CategoryName: category,
 		Page:         page,
 		Limit:        limit,
 	}
-	return r.podcastsClient.ListPodcasts(ctx, params)
+	podcasts, err := r.podcastsClient.ListPodcasts(ctx, params)
+	if err != nil {
+		logger.Error("Podcast query failed", zap.Error(err))
+	}
+
+	totalPages := int(math.Ceil(float64(podcasts.TotalCount) / float64(*limit)))
+	return &model.PodcastPage{
+		PageInfo: &model.PageInfo{
+			CurrentPage: page,
+			TotalPages:  &totalPages,
+		},
+		Items:      podcasts.Podcasts,
+		TotalCount: &podcasts.TotalCount,
+	}, nil
 }
 
-// Query returns graph1.QueryResolver implementation.
+// Query returns graph.QueryResolver implementation.
 func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }

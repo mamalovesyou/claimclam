@@ -1,17 +1,38 @@
 # GraphQL schema for podcast service
+scalar UUID
 
 type Query {
   podcasts(
     search: String
     title: String
-    categoryName: String
+    category: String
     page: Int
     limit: Int
-  ): [Podcast]
+  ): PodcastPage
+}
+
+type PodcastPage {
+  items: [Podcast]
+  totalCount: Int
+  pageInfo: PageInfo
+}
+
+type PageInfo {
+  currentPage: Int
+  totalPages: Int
+}
+
+type PodcastImages {
+  default: String
+  thumbnail: String
+  wide: String
+  featured: String
 }
 
 type Podcast {
-  id: ID!
+  id: UUID!
   title: String!
-  categoryName: String
+  category: String
+  description: String
+  images: PodcastImages
 }

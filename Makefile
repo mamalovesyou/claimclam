@@ -15,6 +15,9 @@ devtools:
 	@cat tools/tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go install % \
     		&& echo "✅ Tools installed" || (echo "❌ Failed to install tools"; exit 1);
 
+gql:
+	go run github.com/99designs/gqlgen gen
+
 ########################
 ###  Docker Compose  ###
 ########################

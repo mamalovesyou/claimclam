@@ -42,6 +42,11 @@ type ListPodcastsParams struct {
 	Limit        *int
 }
 
+type ListPodcastsResponse struct {
+	Podcasts   []*model.Podcast
+	TotalCount int
+}
+
 func (p *ListPodcastsParams) Validate() error {
 	// If page number is not provided or is invalid, set it to 1
 	if p.Page != nil && pointer.GetInt(p.Page) < 1 {
@@ -73,7 +78,7 @@ func (p *ListPodcastsParams) UpdateQueryParams(q url.Values) url.Values {
 	return q
 }
 
-func (c *Client) ListPodcasts(ctx context.Context, params *ListPodcastsParams) ([]*model.Podcast, error) {
+func (c *Client) ListPodcasts(ctx context.Context, params *ListPodcastsParams) (*ListPodcastsResponse, error) {
 
 	// Verify Params for query
 	if err := params.Validate(); err != nil {
@@ -112,5 +117,8 @@ func (c *Client) ListPodcasts(ctx context.Context, params *ListPodcastsParams) (
 		return nil, err
 	}
 
-	return podcasts, nil
+	return &ListPodcastsResponse{
+		Podcasts:   podcasts,
+		TotalCount: 35, // Note: This is a fake value, but it's enough for the example. Ideally we can obtain this value from the podcastt service.
+	}, nil
 }
