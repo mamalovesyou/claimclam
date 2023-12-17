@@ -3,9 +3,11 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { Podcast } from "@/gql/graphql";
+import { Box, Button, CardActions, CardHeader } from "@mui/material";
 
 export type PodcastCardProps = CardProps & {
   podcast: Podcast;
+  onPodcastClick: (podcastId: string) => void;
 };
 
 export const PodcastCard = (props: PodcastCardProps) => {
@@ -22,7 +24,6 @@ export const PodcastCard = (props: PodcastCardProps) => {
       <CardMedia
         component="div"
         sx={{
-          // 16:9
           pt: "56.25%",
         }}
         image={
@@ -34,21 +35,25 @@ export const PodcastCard = (props: PodcastCardProps) => {
         sx={{
           flexGrow: 1,
           textOverflow: "ellipsis",
-          p: 2,
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: "1",
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          {podcast?.title}
-        </Typography>
+        <Box sx={{ pb: 2 }}>
+          <Typography
+            variant="h5"
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: "1",
+              WebkitBoxOrient: "vertical",
+            }}
+          >
+            {podcast?.title}
+          </Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            by {podcast?.publisherName}
+          </Typography>
+        </Box>
         <Typography
           sx={{
             overflow: "hidden",
@@ -61,6 +66,16 @@ export const PodcastCard = (props: PodcastCardProps) => {
           {podcast?.description}
         </Typography>
       </CardContent>
+      <CardActions sx={{ p: 1, justifyContent: "center" }}>
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ p: 1 }}
+          onClick={() => props.onPodcastClick(podcast?.id || "")}
+        >
+          View
+        </Button>
+      </CardActions>
     </Card>
   );
 };

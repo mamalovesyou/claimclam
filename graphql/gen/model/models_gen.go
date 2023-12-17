@@ -12,11 +12,12 @@ type PageInfo struct {
 }
 
 type Podcast struct {
-	ID          uuid.UUID      `json:"id"`
-	Title       string         `json:"title"`
-	Category    *string        `json:"category,omitempty"`
-	Description *string        `json:"description,omitempty"`
-	Images      *PodcastImages `json:"images,omitempty"`
+	ID            uuid.UUID      `json:"id"`
+	Title         string         `json:"title"`
+	CategoryName  *string        `json:"categoryName,omitempty"`
+	PublisherName *string        `json:"publisherName,omitempty"`
+	Description   *string        `json:"description,omitempty"`
+	Images        *PodcastImages `json:"images,omitempty"`
 }
 
 type PodcastImages struct {

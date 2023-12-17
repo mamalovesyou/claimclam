@@ -2,7 +2,12 @@ import { usePodcasts } from "@/hooks/usePodcasts";
 import { CircularProgress, Grid, Pagination, Typography } from "@mui/material";
 import { PodcastCard } from "./PodcastCard";
 
-export const PodcastList = () => {
+type PodcastListProps = {
+  onPodcastClick: (id: string) => void;
+};
+
+export const PodcastList = (props: PodcastListProps) => {
+  const { onPodcastClick } = props;
   const { podcasts, pageInfo, onPageChange, listPodcasts } = usePodcasts();
   const { isFetching } = listPodcasts || {};
   return (
@@ -31,7 +36,9 @@ export const PodcastList = () => {
             lg={3}
             sx={{ display: "flex", justifyContent: "center" }}
           >
-            {podcast ? <PodcastCard podcast={podcast} /> : null}
+            {podcast ? (
+              <PodcastCard podcast={podcast} onPodcastClick={onPodcastClick} />
+            ) : null}
           </Grid>
         ))}
       {podcasts.length === 0 && (

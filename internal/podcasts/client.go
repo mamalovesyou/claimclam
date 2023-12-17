@@ -121,6 +121,8 @@ func (c *client) ListPodcasts(ctx context.Context, params *ListPodcastsParams) (
 		return nil, err
 	}
 
+	fmt.Println(podcasts[0])
+
 	return &ListPodcastsResponse{
 		Podcasts:   podcasts,
 		TotalCount: 35, // Note: This is a fake value, but it's enough for the example. Ideally we can obtain this value from the podcastt service.

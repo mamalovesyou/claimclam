@@ -25,8 +25,10 @@ const listPodcastsQuery = graphql(/* GraphQL */ `
         description
         images {
           thumbnail
+          wide
         }
-        category
+        categoryName
+        publisherName
       }
       pageInfo {
         currentPage

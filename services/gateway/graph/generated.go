@@ -52,11 +52,12 @@ type ComplexityRoot struct {
 	}
 
 	Podcast struct {
-		Category    func(childComplexity int) int
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Images      func(childComplexity int) int
-		Title       func(childComplexity int) int
+		CategoryName  func(childComplexity int) int
+		Description   func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Images        func(childComplexity int) int
+		PublisherName func(childComplexity int) int
+		Title         func(childComplexity int) int
 	}
 
 	PodcastImages struct {
@@ -114,12 +115,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PageInfo.TotalPages(childComplexity), true
 
-	case "Podcast.category":
-		if e.complexity.Podcast.Category == nil {
+	case "Podcast.categoryName":
+		if e.complexity.Podcast.CategoryName == nil {
 			break
 		}
 
-		return e.complexity.Podcast.Category(childComplexity), true
+		return e.complexity.Podcast.CategoryName(childComplexity), true
 
 	case "Podcast.description":
 		if e.complexity.Podcast.Description == nil {
@@ -141,6 +142,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Podcast.Images(childComplexity), true
+
+	case "Podcast.publisherName":
+		if e.complexity.Podcast.PublisherName == nil {
+			break
+		}
+
+		return e.complexity.Podcast.PublisherName(childComplexity), true
 
 	case "Podcast.title":
 		if e.complexity.Podcast.Title == nil {
@@ -307,6 +315,7 @@ type Query {
     search: String
     title: String
     category: String
+
     page: Int
     limit: Int
   ): PodcastPage
@@ -333,7 +342,8 @@ type PodcastImages {
 type Podcast {
   id: UUID!
   title: String!
-  category: String
+  categoryName: String
+  publisherName: String
   description: String
   images: PodcastImages
 }
@@ -619,8 +629,8 @@ func (ec *executionContext) fieldContext_Podcast_title(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Podcast_category(ctx context.Context, field graphql.CollectedField, obj *model.Podcast) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Podcast_category(ctx, field)
+func (ec *executionContext) _Podcast_categoryName(ctx context.Context, field graphql.CollectedField, obj *model.Podcast) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Podcast_categoryName(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -633,7 +643,7 @@ func (ec *executionContext) _Podcast_category(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Category, nil
+		return obj.CategoryName, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -647,7 +657,48 @@ func (ec *executionContext) _Podcast_category(ctx context.Context, field graphql
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Podcast_category(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Podcast_categoryName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Podcast",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Podcast_publisherName(ctx context.Context, field graphql.CollectedField, obj *model.Podcast) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Podcast_publisherName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PublisherName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Podcast_publisherName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Podcast",
 		Field:      field,
@@ -956,8 +1007,10 @@ func (ec *executionContext) fieldContext_PodcastPage_items(ctx context.Context, 
 				return ec.fieldContext_Podcast_id(ctx, field)
 			case "title":
 				return ec.fieldContext_Podcast_title(ctx, field)
-			case "category":
-				return ec.fieldContext_Podcast_category(ctx, field)
+			case "categoryName":
+				return ec.fieldContext_Podcast_categoryName(ctx, field)
+			case "publisherName":
+				return ec.fieldContext_Podcast_publisherName(ctx, field)
 			case "description":
 				return ec.fieldContext_Podcast_description(ctx, field)
 			case "images":
@@ -3086,8 +3139,10 @@ func (ec *executionContext) _Podcast(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "category":
-			out.Values[i] = ec._Podcast_category(ctx, field, obj)
+		case "categoryName":
+			out.Values[i] = ec._Podcast_categoryName(ctx, field, obj)
+		case "publisherName":
+			out.Values[i] = ec._Podcast_publisherName(ctx, field, obj)
 		case "description":
 			out.Values[i] = ec._Podcast_description(ctx, field, obj)
 		case "images":
