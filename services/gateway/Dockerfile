@@ -5,8 +5,7 @@ RUN go mod download
 
 FROM dependencies as builder
 COPY . .
-ARG MAKE_TARGET
-RUN make $MAKE_TARGET
+RUN make service.gateway
 
 # https://docs.aws.amazon.com/inspector/latest/user/supported.html#supported-os-ecr
 FROM alpine:latest as prod

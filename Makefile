@@ -1,6 +1,7 @@
 PROJECT_NAME := claimclam
 MODULE_NAME := github.com/mamalovesyou/$(PROJECT_NAME)
 
+BIN := $(CURDIR)/bin
 DEPLOYMENT := $(CURDIR)/deployment
 LOCAL_DOCKER_COMPOSE := $(DEPLOYMENT)/local
 DOCKER_COMPOSE_CLEAN_FLAGS=--volumes --rmi local --remove-orphans
@@ -20,6 +21,29 @@ gql:
 
 tests.unit:
 	go test ./... -v -coverprofile=coverage.out
+
+########################
+###     Services     ###
+########################
+services: services.clean service.gateway
+
+service.gateway:
+	@printf "Build gateway service with OS: $(GOOS), ARCH: $(GOARCH)..."
+	@mkdir -p $(BIN)
+	CGO_ENABLED=$(CGO_ENABLED) go build  -o $(BIN)/gateway-cli services/gateway/main.go
+
+services.clean:
+	@echo "Delete old binaries..."
+	@rm -f $(BIN)/*
+
+########################
+###  Docker  ###
+########################
+
+gateway: ## Start dev environment with docker
+	@echo "Building gateway container..."
+	docker build -f services/gateway/Dockerfile . -t $(PROJECT_NAME)/gateway:latest
+
 
 ########################
 ###  Docker Compose  ###
