@@ -19,6 +19,7 @@
 - [x] Use graphQL as a protocol between UI and API gateway
   - I used graphql codegen to generate typescript types for the graphql api.
 - [x] Add basic rate limiting 
+  - For simplicity, the rate limiter is implemented in memory and is not persisted. For a production deployment, its better to use a key/value store like redis so the rate limiter can be shared accross multiple instances of the api gateway.
 - [x] Add health basic health endpoint for gateway service
   
    
