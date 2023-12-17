@@ -41,7 +41,7 @@ This services is a simple api gateway that exposes the graphql api. It is delive
 
 ### Webapp
 
-This is a Nextjs14 webapp that uses the AppRouter. It's build with typescript and MUI. Graphql types are generated using graphql codegen to enhance type safety. Queries are done using @tanstack/react-query which brings amazing error handling, caching etc. State are managed with the React Context and useState.
+This is a Nextjs14 webapp that uses the AppRouter. It's build with typescript and MUI. Graphql types are generated using graphql codegen to enhance type safety. Queries are done using @tanstack/react-query which brings amazing error handling, caching etc. I used the built-in React Context API as solution for managing state given the simplicity of the app. However for a more complex state management I would suggest using recoil or redux.
 
 ## How to run
 
@@ -53,4 +53,7 @@ Run `make tests.unit`
 
 ### Generate graphql code for gateway
 Run `make gql`
+
+### Generate graphql code for webapp
+Run `yarn codegen` inside webapp directory
 
