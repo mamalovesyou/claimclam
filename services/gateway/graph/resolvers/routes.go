@@ -3,7 +3,7 @@ package resolvers
 import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/gorilla/mux"
-	"github.com/mamalovesyou/getclaim/services/gateway/graph"
+	"github.com/mamalovesyou/claimclam/services/gateway/graph"
 	"go.uber.org/zap"
 
 	"github.com/99designs/gqlgen/graphql/playground"

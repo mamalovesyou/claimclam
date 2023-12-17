@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/mamalovesyou/getclaim/internal/logging"
-	"github.com/mamalovesyou/getclaim/internal/server"
-	"github.com/mamalovesyou/getclaim/services/gateway/app"
+	"github.com/mamalovesyou/claimclam/internal/logging"
+	"github.com/mamalovesyou/claimclam/internal/server"
+	"github.com/mamalovesyou/claimclam/services/gateway/app"
 	"github.com/spf13/cobra"
 )
 

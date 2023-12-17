@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mamalovesyou/getclaim/internal/env"
-	"github.com/mamalovesyou/getclaim/internal/logging"
-	"github.com/mamalovesyou/getclaim/services/gateway/config"
+	"github.com/mamalovesyou/claimclam/internal/env"
+	"github.com/mamalovesyou/claimclam/internal/logging"
+	"github.com/mamalovesyou/claimclam/services/gateway/config"
 
 	"github.com/spf13/cobra"
 )

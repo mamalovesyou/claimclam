@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/mamalovesyou/getclaim/internal/ratelimiter"
+	"github.com/mamalovesyou/claimclam/internal/ratelimiter"
 	"github.com/rs/cors"
 	"go.uber.org/fx"
 )

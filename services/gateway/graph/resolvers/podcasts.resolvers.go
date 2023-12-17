@@ -8,10 +8,10 @@ import (
 	"context"
 	"math"
 
-	"github.com/mamalovesyou/getclaim/graphql/gen/model"
-	"github.com/mamalovesyou/getclaim/internal/logging"
-	"github.com/mamalovesyou/getclaim/internal/podcasts"
-	"github.com/mamalovesyou/getclaim/services/gateway/graph"
+	"github.com/mamalovesyou/claimclam/graphql/gen/model"
+	"github.com/mamalovesyou/claimclam/internal/logging"
+	"github.com/mamalovesyou/claimclam/internal/podcasts"
+	"github.com/mamalovesyou/claimclam/services/gateway/graph"
 	"go.uber.org/zap"
 )
 
@@ -29,6 +29,7 @@ func (r *queryResolver) Podcasts(ctx context.Context, search *string, title *str
 	podcasts, err := r.podcastsClient.ListPodcasts(ctx, params)
 	if err != nil {
 		logger.Error("Podcast query failed", zap.Error(err))
+		return nil, err
 	}
 
 	totalPages := int(math.Ceil(float64(podcasts.TotalCount) / float64(*limit)))

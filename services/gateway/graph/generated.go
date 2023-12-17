@@ -14,7 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/google/uuid"
-	"github.com/mamalovesyou/getclaim/graphql/gen/model"
+	"github.com/mamalovesyou/claimclam/graphql/gen/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -726,7 +726,7 @@ func (ec *executionContext) _Podcast_images(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.PodcastImages)
 	fc.Result = res
-	return ec.marshalOPodcastImages2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcastImages(ctx, field.Selections, res)
+	return ec.marshalOPodcastImages2ᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPodcastImages(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Podcast_images(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -941,7 +941,7 @@ func (ec *executionContext) _PodcastPage_items(ctx context.Context, field graphq
 	}
 	res := resTmp.([]*model.Podcast)
 	fc.Result = res
-	return ec.marshalOPodcast2ᚕᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx, field.Selections, res)
+	return ec.marshalOPodcast2ᚕᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PodcastPage_items(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1035,7 +1035,7 @@ func (ec *executionContext) _PodcastPage_pageInfo(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.PageInfo)
 	fc.Result = res
-	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalOPageInfo2ᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PodcastPage_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1082,7 +1082,7 @@ func (ec *executionContext) _Query_podcasts(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.PodcastPage)
 	fc.Result = res
-	return ec.marshalOPodcastPage2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcastPage(ctx, field.Selections, res)
+	return ec.marshalOPodcastPage2ᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPodcastPage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_podcasts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3932,14 +3932,14 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOPageInfo2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
+func (ec *executionContext) marshalOPageInfo2ᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PageInfo(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPodcast2ᚕᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx context.Context, sel ast.SelectionSet, v []*model.Podcast) graphql.Marshaler {
+func (ec *executionContext) marshalOPodcast2ᚕᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx context.Context, sel ast.SelectionSet, v []*model.Podcast) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3966,7 +3966,7 @@ func (ec *executionContext) marshalOPodcast2ᚕᚖgithubᚗcomᚋmamalovesyouᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOPodcast2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx, sel, v[i])
+			ret[i] = ec.marshalOPodcast2ᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3980,21 +3980,21 @@ func (ec *executionContext) marshalOPodcast2ᚕᚖgithubᚗcomᚋmamalovesyouᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalOPodcast2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx context.Context, sel ast.SelectionSet, v *model.Podcast) graphql.Marshaler {
+func (ec *executionContext) marshalOPodcast2ᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPodcast(ctx context.Context, sel ast.SelectionSet, v *model.Podcast) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Podcast(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPodcastImages2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcastImages(ctx context.Context, sel ast.SelectionSet, v *model.PodcastImages) graphql.Marshaler {
+func (ec *executionContext) marshalOPodcastImages2ᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPodcastImages(ctx context.Context, sel ast.SelectionSet, v *model.PodcastImages) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PodcastImages(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPodcastPage2ᚖgithubᚗcomᚋmamalovesyouᚋgetclaimᚋgraphqlᚋgenᚋmodelᚐPodcastPage(ctx context.Context, sel ast.SelectionSet, v *model.PodcastPage) graphql.Marshaler {
+func (ec *executionContext) marshalOPodcastPage2ᚖgithubᚗcomᚋmamalovesyouᚋclaimclamᚋgraphqlᚋgenᚋmodelᚐPodcastPage(ctx context.Context, sel ast.SelectionSet, v *model.PodcastPage) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

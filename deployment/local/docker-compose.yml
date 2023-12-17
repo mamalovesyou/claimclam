@@ -7,21 +7,20 @@ services:
       context: ../../webapp
       dockerfile: Dockerfile.dev
     volumes:
-      - ../../webapp/node_modules:/app/node_modules
       - ../../webapp/src:/app/src
       - ../../webapp/public:/app/public
     restart: always
     ports:
       - 3000:3000
     networks:
-      - getclaim_net
+      - claimclam_net
 
   gateway:
     image: cosmtrek/air
-    working_dir: /getclaim
+    working_dir: /claimclam
     entrypoint: ["air", "-c", "./services/gateway/air.toml"]
     volumes:
-      - ../..:/getclaim:delegated
+      - ../..:/claimclam:delegated
     ports:
       - 3001:3001
     environment:
@@ -29,7 +28,7 @@ services:
     env_file:
       - ../../.env
     networks:
-      - getclaim_net
+      - claimclam_net
 
 networks:
-  getclaim_net:
+  claimclam_net:

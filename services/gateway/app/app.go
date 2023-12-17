@@ -2,10 +2,10 @@ package app
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/mamalovesyou/getclaim/internal/logging"
-	"github.com/mamalovesyou/getclaim/internal/podcasts"
-	"github.com/mamalovesyou/getclaim/internal/server"
-	"github.com/mamalovesyou/getclaim/services/gateway/graph/resolvers"
+	"github.com/mamalovesyou/claimclam/internal/logging"
+	"github.com/mamalovesyou/claimclam/internal/podcasts"
+	"github.com/mamalovesyou/claimclam/internal/server"
+	"github.com/mamalovesyou/claimclam/services/gateway/graph/resolvers"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"

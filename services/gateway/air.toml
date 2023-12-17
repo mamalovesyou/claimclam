@@ -8,7 +8,7 @@ tmp_dir = "/tmp"
 
 [build]
 # Just plain old shell command. You could use `make` as well.
-cmd = "go build -buildvcs=false -o /tmp/main github.com/mamalovesyou/getclaim/services/gateway"
+cmd = "go build -buildvcs=false -o /tmp/main github.com/mamalovesyou/claimclam/services/gateway"
 # Binary file yields from `cmd`.
 bin = "/tmp/main"
 # Customize binary.
@@ -20,7 +20,7 @@ include_ext = ["go", "tpl", "tmpl", "yaml", "yml"]
 exclude_dir = ["**/node_modules"]
 
 # Watch these directories if you specified.
-include_dir = ["getclaim/internal", "getclaim/services/gateway"]
+include_dir = ["claimclam/internal", "claimclam/services/gateway"]
 
 # Exclude files.
 exclude_file = []

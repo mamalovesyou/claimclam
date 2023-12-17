@@ -1,4 +1,4 @@
-PROJECT_NAME := getclaim
+PROJECT_NAME := claimclam
 MODULE_NAME := github.com/mamalovesyou/$(PROJECT_NAME)
 
 DEPLOYMENT := $(CURDIR)/deployment
@@ -17,6 +17,9 @@ devtools:
 
 gql:
 	go run github.com/99designs/gqlgen gen
+
+tests.unit:
+	go test ./... -v -coverprofile=coverage.out
 
 ########################
 ###  Docker Compose  ###

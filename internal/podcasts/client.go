@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/AlekSi/pointer"
-	"github.com/mamalovesyou/getclaim/graphql/gen/model"
-	"github.com/mamalovesyou/getclaim/internal/logging"
+	"github.com/mamalovesyou/claimclam/graphql/gen/model"
+	"github.com/mamalovesyou/claimclam/internal/logging"
 	"go.uber.org/zap"
 )
 
@@ -22,12 +22,16 @@ var (
 	ErrInvalidLimitParams = errors.New("invalid parameter: limit must be greater than 0")
 )
 
-type Client struct {
+type client struct {
 	httpClient *http.Client
 }
 
-func NewClient() *Client {
-	return &Client{
+type PodcastClient interface {
+	ListPodcasts(ctx context.Context, params *ListPodcastsParams) (*ListPodcastsResponse, error)
+}
+
+func NewClient() PodcastClient {
+	return &client{
 		httpClient: &http.Client{
 			Timeout: time.Second * 30, // Add default 30 seconds timeout
 		},
@@ -47,7 +51,7 @@ type ListPodcastsResponse struct {
 	TotalCount int
 }
 
-func (p *ListPodcastsParams) Validate() error {
+func (p *ListPodcastsParams) validate() error {
 	// If page number is not provided or is invalid, set it to 1
 	if p.Page != nil && pointer.GetInt(p.Page) < 1 {
 		return ErrInvalidPageParams
@@ -59,7 +63,7 @@ func (p *ListPodcastsParams) Validate() error {
 	return nil
 }
 
-func (p *ListPodcastsParams) UpdateQueryParams(q url.Values) url.Values {
+func (p *ListPodcastsParams) updateQueryParams(q url.Values) url.Values {
 	if p.Search != nil {
 		q.Add("search", pointer.GetString(p.Search))
 	}
@@ -78,10 +82,10 @@ func (p *ListPodcastsParams) UpdateQueryParams(q url.Values) url.Values {
 	return q
 }
 
-func (c *Client) ListPodcasts(ctx context.Context, params *ListPodcastsParams) (*ListPodcastsResponse, error) {
+func (c *client) ListPodcasts(ctx context.Context, params *ListPodcastsParams) (*ListPodcastsResponse, error) {
 
 	// Verify Params for query
-	if err := params.Validate(); err != nil {
+	if err := params.validate(); err != nil {
 		logging.WithContext(ctx).Error("Invalid params", zap.Error(err))
 		return nil, err
 	}
@@ -93,7 +97,7 @@ func (c *Client) ListPodcasts(ctx context.Context, params *ListPodcastsParams) (
 	}
 
 	q := req.URL.Query()
-	q = params.UpdateQueryParams(q)
+	q = params.updateQueryParams(q)
 	req.URL.RawQuery = q.Encode()
 
 	resp, err := c.httpClient.Do(req)
